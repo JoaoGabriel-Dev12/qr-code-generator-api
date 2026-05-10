@@ -1,10 +1,16 @@
-FROM eclipse-temurin:21-jdk-alpine AS build
+FROM maven:3.9.9-amazoncorretto-21 AS build 
+
 WORKDIR /app
 COPY . .
-RUN ./mvnw clean package -DskipTests
 
-FROM eclipse-temurin:21-jre-alpine
+RUN mvn clean package -DskipTests
+
+FROM amazoncorretto:21-al2023-headless
+
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"]
+
+COPY --from=build /app/target/qrcode-generator-0.0.1-SNAPSHOT.jar app.jar
+
+ENTRYPOINT [ "java", "-jar", "app.jar" ]
